@@ -81,15 +81,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ darwin, windows, linux ]
+        os: [ darwin, linux ]
         arch: [ amd64, arm64 ]
-        include:
-          - os: windows
-            arch: amd64
-            ext: .exe
-        exclude:
-          - os: windows
-            arch: arm64
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -110,7 +103,6 @@ jobs:
           VERSION: ${{ needs.setup.outputs.version }}
           GOOS: ${{ matrix.os }}
           GOARCH: ${{ matrix.arch }}
-          CLI_EXT: ${{ matrix.ext }}
         run: make build
 
       - name: Upload Release Asset
@@ -120,6 +112,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.release-url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./build/dist/${{ matrix.os }}_${{ matrix.arch }}/avm{{ matrix.ext }}
-          asset_name: avm-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}
+          asset_path: ./build/dist/${{ matrix.os }}_${{ matrix.arch }}/avm
+          asset_name: avm-${{ matrix.os }}-${{ matrix.arch }}
           asset_content_type: binary/octet-stream

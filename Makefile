@@ -21,8 +21,8 @@ build-dirs:
 
 .PHONY: build
 build: build-dirs Makefile
-	@echo "Building ${DIST_DIR}/avm${CLI_EXT}..."
-	@go build -v -ldflags="-X 'github.com/armory/avm/cmd/version.Version=${VERSION}'" -o ${DIST_DIR}/avm${CLI_EXT} main.go
+	@echo "Building ${DIST_DIR}/avm..."
+	@go build -v -ldflags="-X 'github.com/armory/avm/cmd/version.Version=${VERSION}'" -o ${DIST_DIR}/avm main.go
 
 ############
 ## Testing
