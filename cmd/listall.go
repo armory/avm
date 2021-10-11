@@ -21,5 +21,5 @@ func execListAllCmd(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	rootCmd.AddCommand(listallCmd)
+	RootCmd.AddCommand(listallCmd)
 }

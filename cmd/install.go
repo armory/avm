@@ -56,7 +56,7 @@ func execInstallCmd(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	rootCmd.AddCommand(installCmd)
+	RootCmd.AddCommand(installCmd)
 	installCmd.Flags().BoolP("default", "d", false, "Set version as default")
 }
 

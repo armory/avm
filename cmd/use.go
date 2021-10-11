@@ -19,5 +19,5 @@ func executeUseCmd(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	rootCmd.AddCommand(useCmd)
+	RootCmd.AddCommand(useCmd)
 }

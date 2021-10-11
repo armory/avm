@@ -15,8 +15,8 @@ const (
 
 var verboseFlag bool
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
+// RootCmd represents the base command when called without any subcommands
+var RootCmd = &cobra.Command{
 	Use:   "avm",
 	Short: "Armory Version Manager",
 }
@@ -37,12 +37,12 @@ func Execute()  {
 		log.Fatalf("Unable to make ~/.avm")
 	}
 
-	cobra.CheckErr(rootCmd.Execute())
+	cobra.CheckErr(RootCmd.Execute())
 }
 
 func init() {
-	rootCmd.PersistentFlags().BoolVarP(&verboseFlag, "verbose", "v", false, "show more details")
-	rootCmd.PersistentPreRunE = configureLogging
+	RootCmd.PersistentFlags().BoolVarP(&verboseFlag, "verbose", "v", false, "show more details")
+	RootCmd.PersistentPreRunE = configureLogging
 }
 
 func configureLogging(cmd *cobra.Command, args []string) error {
