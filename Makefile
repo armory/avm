@@ -22,7 +22,7 @@ build-dirs:
 .PHONY: build
 build: build-dirs Makefile
 	@echo "Building ${DIST_DIR}/avm..."
-	@go build -v -ldflags="-X 'github.com/armory/avm/cmd/version.Version=${VERSION}'" -o ${DIST_DIR}/avm main.go
+	@go build -v -ldflags="-X 'github.com/armory/avm/cmd.Version=${VERSION}'" -o ${DIST_DIR}/avm main.go
 
 ############
 ## Testing
