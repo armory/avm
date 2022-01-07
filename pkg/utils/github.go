@@ -9,15 +9,15 @@ import (
 )
 
 const (
-	OWNER = "armory"
-	REPO  = "armory-cli"
+	OWNER   = "armory-io"
+	REPO    = "armory-cli"
 	COMMAND = "armory"
 )
 
 var client = github.NewClient(nil)
 var ctx = context.Background()
 
-func GetAllReleases() []*github.RepositoryRelease  {
+func GetAllReleases() []*github.RepositoryRelease {
 	opt := &github.ListOptions{
 		PerPage: 10,
 	}
