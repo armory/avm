@@ -1,0 +1,72 @@
+#! /usr/bin/env bash
+
+RAW_ARCH=$(uname -m)
+OS=
+case $(uname) in
+  'Linux')
+    OS='linux'
+    ;;
+  'Darwin')
+    OS='darwin'
+    ;;
+  *)
+    echo "un-supported OS detected: ${OS}-${RAW_ARCH}, exiting..."
+    exit 1
+    ;;
+esac
+
+ARCH=""
+case $RAW_ARCH in
+    x86_64) ARCH="amd64" ;;
+    arm64)  ARCH="arm64" ;;
+    *)
+      echo "un-supported os/arch detected: ${OS}-${RAW_ARCH}, exiting..."
+      exit 1
+      ;;
+esac
+
+echo "Detected ${OS}-${ARCH}, preparing to install Armory Version Manager"
+
+DOWNLOAD_URL=$(curl -L -s https://api.github.com/repos/armory/avm/releases/latest | grep "browser_download_url.*avm-${OS}-${ARCH}" | cut -d : -f 2,3 | tr -d \" | xargs echo -n)
+DEST_DIR="${HOME}/.avm/bin"
+mkdir -p "$DEST_DIR"
+DEST="${DEST_DIR}/avm"
+echo "saving '${DOWNLOAD_URL}' to ${DEST}"
+curl -sL "${DOWNLOAD_URL}" --output "${DEST}"
+chmod +x "${DEST}"
+
+export PATH="${PATH}:${DEST_DIR}"
+
+echo "Installing latest Armory CLI with AVM, to upgrade in the future run 'avm'"
+avm install
+
+PATH_SNIPPIT="\n#This adds the Armory Version Manager (AVM) and Armory CLI to the path\nexport PATH=\"\${PATH}:${HOME}/.avm/bin\""
+avm_bash_profile="${HOME}/.bash_profile"
+avm_bashrc="${HOME}/.bashrc"
+avm_zshrc="${ZDOTDIR:-${HOME}}/.zshrc"
+if [[ $OS == 'darwin' ]]; then
+  touch "$avm_bash_profile"
+  echo "Attempt update of login bash profile on OSX..."
+  if [[ -z $(grep "export PATH=\"\${PATH}:${HOME}/.avm/bin" "$avm_bash_profile") ]]; then
+    echo -e "$PATH_SNIPPIT" >> "$avm_bash_profile"
+    echo "Added avm init snippet to $avm_bash_profile"
+  fi
+else
+  echo "Attempt update of interactive bash profile on regular UNIX..."
+  touch "${avm_bashrc}"
+  if [[ -z $(grep "export PATH=\"\${PATH}:${HOME}/.avm/bin" "$avm_bashrc") ]]; then
+      echo -e "$PATH_SNIPPIT" >> "$avm_bashrc"
+      echo "Added avm init snippet to $avm_bashrc"
+  fi
+fi
+
+echo "Attempt update of zsh profile..."
+touch "$avm_zshrc"
+if [[ -z $(grep "export PATH=\"\${PATH}:${HOME}/.avm/bin" "$avm_zshrc") ]]; then
+    echo -e "$PATH_SNIPPIT" >> "$avm_zshrc"
+    echo "Updated existing ${avm_zshrc}"
+fi
+
+echo "Install of avm, and armory complete"
+echo "In most cases this install script updates your bash or zsh profile to add ${HOME}/.avm/bin to your path"
+echo "You may have to open a new terminal session or re-source your bash or zsh profile/rc"
