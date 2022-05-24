@@ -40,7 +40,7 @@ export PATH="${PATH}:${DEST_DIR}"
 echo "Installing latest Armory CLI with AVM, to upgrade in the future run 'avm'"
 avm install
 
-PATH_SNIPPIT="\n#This adds the Armory Version Manager (AVM) and Armory CLI to the path\nexport PATH=\"\${PATH}:${HOME}/.avm/bin\""
+PATH_SNIPPIT="\n# This adds the Armory Version Manager (AVM) and Armory CLI to the path\nexport PATH=\"\${PATH}:${HOME}/.avm/bin\""
 avm_bash_profile="${HOME}/.bash_profile"
 avm_bashrc="${HOME}/.bashrc"
 avm_zshrc="${ZDOTDIR:-${HOME}}/.zshrc"
