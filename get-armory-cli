@@ -1,5 +1,16 @@
 #! /usr/bin/env bash
 
+throw_error_message() {
+   echo "#############################################################################################################"
+   echo "#                           There was a problem trying to download/install avm, and armory"
+   echo "#"
+   echo "# $1"
+   echo "#"
+   echo "# You can keep installing it manually - https://docs.armory.io/cd-as-a-service/setup/cli/#local-installation"
+   echo "#############################################################################################################"
+   exit 1
+}
+
 RAW_ARCH=$(uname -m)
 OS=
 case $(uname) in
@@ -25,6 +36,23 @@ case $RAW_ARCH in
       ;;
 esac
 
+# Sanity checks
+
+echo "Looking for dependencies..."
+if ! command -v curl > /dev/null; then
+	echo "######################################################################################################"
+	echo "# curl not found."
+	echo "#"
+	echo "# Please install curl on your system using your favourite package manager."
+	echo "######################################################################################################"
+	exit 1
+fi
+
+status_code=$(curl --write-out %{http_code} --silent --output /dev/null https://api.github.com/repos/armory/avm/releases/latest)
+if [[ "$status_code" -eq 403 ]] ; then
+    throw_error_message "GitHub API rate limit exceeded - Check out GitHub documentation for more details."
+fi
+
 echo "Detected ${OS}-${ARCH}, preparing to install Armory Version Manager and Armory CLI"
 
 DOWNLOAD_URL=$(curl -L -s https://api.github.com/repos/armory/avm/releases/latest | grep "browser_download_url.*avm-${OS}-${ARCH}" | cut -d : -f 2,3 | tr -d \" | xargs echo -n)
@@ -33,9 +61,18 @@ mkdir -p "$DEST_DIR"
 DEST="${DEST_DIR}/avm"
 echo "saving '${DOWNLOAD_URL}' to ${DEST}"
 curl -sL "${DOWNLOAD_URL}" --output "${DEST}"
+
+if [ ! -f "$DEST" ]; then
+	throw_error_message "Binary file do not downloaded."
+fi
+
 chmod +x "${DEST}"
 
 export PATH="${PATH}:${DEST_DIR}"
+
+if ! command -v avm > /dev/null; then
+	throw_error_message "avm was not installed correctly, there was an issue trying to add it to the path"
+fi
 
 echo "Installing latest Armory CLI with AVM, to upgrade in the future use 'avm'"
 avm install
