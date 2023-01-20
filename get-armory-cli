@@ -1,12 +1,43 @@
 #! /usr/bin/env bash
 
+calculate_time_to_retry_in_minutes() {
+  time_to_retry=$1
+  current_date=$(date +%s)
+  retry_in_date=$(date -r "$time_to_retry" +%s)
+  echo $(( (retry_in_date - current_date) / 60))
+}
+
 throw_error_message() {
    echo "#############################################################################################################"
-   echo "#                           There was a problem trying to download/install avm, and armory"
+   echo "#             We're so sorry, we couldn't install Armory Version Manager (avm) or the armory CLI."
    echo "#"
    echo "# $1"
    echo "#"
-   echo "# You can keep installing it manually - https://docs.armory.io/cd-as-a-service/setup/cli/#local-installation"
+   echo "# You can install the armory CLI manually by referring to our docs here - https://docs.armory.io/cd-as-a-service/setup/cli/."
+   echo "# You can still install avm manually - please refer to the avm release page where you can download and install it https://github.com/armory/avm/releases"
+	 echo "#"
+	 echo "# Please consider running the following commands if you need to install avm manually."
+	 echo ""
+	 echo "    1. Download the AVM for your operating system and CPU architecture."
+	 echo "    $ curl -LO https://github.com/armory/avm/releases/latest/download/avm-<os>-<architecture>"
+	 echo ""
+	 echo "    2. Give AVM execute permissions"
+	 echo "    $ chmod +x avm-darwin-amd64"
+	 echo ""
+	 echo "    3. Confirm that /usr/local/bin is on your PATH:"
+	 echo "    $ echo \"\$PATH\""
+	 echo ""
+	 echo "    4. Give AVM execute permissions"
+	 echo "    $ mv avm-darwin-amd64 /usr/local/bin/avm"
+	 echo ""
+	 echo "    5. Run the following command to install the CLI:"
+	 echo "    $ avm install"
+	 echo ""
+	 echo "    6. Add the directory that AVM returned when you ran avm install to your path."
+	 echo ""
+	 echo "    7. Run the following command to verify that the CLI is installed:"
+	 echo "    $ armory"
+	 echo ""
    echo "#############################################################################################################"
    exit 1
 }
@@ -43,14 +74,15 @@ if ! command -v curl > /dev/null; then
 	echo "######################################################################################################"
 	echo "# curl not found."
 	echo "#"
-	echo "# Please install curl on your system using your favourite package manager."
+	echo "# Please install curl on your system using your favorite package manager, then re-run this script."
 	echo "######################################################################################################"
 	exit 1
 fi
 
 status_code=$(curl --write-out %{http_code} --silent --output /dev/null https://api.github.com/repos/armory/avm/releases/latest)
 if [[ "$status_code" -eq 403 ]] ; then
-    throw_error_message "GitHub API rate limit exceeded - Check out GitHub documentation for more details."
+    time_to_retry=$(curl -s -I -L https://api.github.com/repos/armory/avm/releases/latest | grep "X-RateLimit-Reset:" | cut -d : -f 2 | tr -d $'\r' | bc | xargs echo -n)
+    throw_error_message "GitHub API rate limit exceeded - Check out GitHub documentation for more details, you can re-run this script in $(calculate_time_to_retry_in_minutes "$time_to_retry") minutes."
 fi
 
 echo "Detected ${OS}-${ARCH}, preparing to install Armory Version Manager and Armory CLI"
@@ -63,7 +95,7 @@ echo "saving '${DOWNLOAD_URL}' to ${DEST}"
 curl -sL "${DOWNLOAD_URL}" --output "${DEST}"
 
 if [ ! -f "$DEST" ]; then
-	throw_error_message "Binary file do not downloaded."
+	throw_error_message "Binary file didn't download."
 fi
 
 chmod +x "${DEST}"
