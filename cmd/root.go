@@ -21,7 +21,8 @@ var RootCmd = &cobra.Command{
 	Short: "Armory Version Manager",
 }
 
-func Execute()  {
+func Execute() {
+	//goland:noinspection GoBoolExpressions because incorrectly detects as "always false"
 	if runtime.GOOS == "windows" {
 		log.Fatalf("avm only supports OS X and GNU+Linux")
 	}
@@ -52,7 +53,7 @@ func configureLogging(cmd *cobra.Command, args []string) error {
 	}
 	log.SetLevel(lvl)
 	log.SetFormatter(&easy.Formatter{
-		LogFormat:       "%msg%\n",
+		LogFormat: "%msg%\n",
 	})
 	return nil
 }
