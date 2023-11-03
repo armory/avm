@@ -1,12 +1,5 @@
 #! /usr/bin/env bash
 
-calculate_time_to_retry_in_minutes() {
-  time_to_retry=$1
-  current_date=$(date +%s)
-  retry_in_date=$(date -r "$time_to_retry" +%s)
-  echo $(( (retry_in_date - current_date) / 60))
-}
-
 throw_error_message() {
    echo "#############################################################################################################"
    echo "#             We're so sorry, we couldn't install Armory Version Manager (avm) or the armory CLI."
@@ -79,15 +72,9 @@ if ! command -v curl > /dev/null; then
 	exit 1
 fi
 
-status_code=$(curl --write-out %{http_code} --silent --output /dev/null https://api.github.com/repos/armory/avm/releases/latest)
-if [[ "$status_code" -eq 403 ]] ; then
-    time_to_retry=$(curl -s -I -L https://api.github.com/repos/armory/avm/releases/latest | grep "X-RateLimit-Reset:" | cut -d : -f 2 | tr -d $'\r' | bc | xargs echo -n)
-    throw_error_message "GitHub API rate limit exceeded - Check out GitHub documentation for more details, you can re-run this script in $(calculate_time_to_retry_in_minutes "$time_to_retry") minutes."
-fi
-
 echo "Detected ${OS}-${ARCH}, preparing to install Armory Version Manager and Armory CLI"
 
-DOWNLOAD_URL=$(curl -L -s https://api.github.com/repos/armory/avm/releases/latest | grep "browser_download_url.*avm-${OS}-${ARCH}" | cut -d : -f 2,3 | tr -d \" | xargs echo -n)
+DOWNLOAD_URL=https://armory-cli-releases.s3.amazonaws.com/avm/v1.2.0/avm-${OS}-${ARCH}
 DEST_DIR="${HOME}/.avm/bin"
 mkdir -p "$DEST_DIR"
 DEST="${DEST_DIR}/avm"
