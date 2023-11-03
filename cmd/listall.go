@@ -10,13 +10,16 @@ import (
 var listallCmd = &cobra.Command{
 	Use:   "listall",
 	Short: "list available versions",
-	Run: execListAllCmd,
+	Run:   execListAllCmd,
 }
 
 func execListAllCmd(cmd *cobra.Command, args []string) {
-	allReleases := utils.GetAllReleases()
-	for _, release := range allReleases {
-		log.Infof(*release.TagName)
+	versions, err := utils.GetAllVersions()
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	for _, version := range versions {
+		log.Infof(version)
 	}
 }
 

@@ -9,10 +9,6 @@ import (
 	"runtime"
 )
 
-const (
-	COMMAND = "armory"
-)
-
 var verboseFlag bool
 
 // RootCmd represents the base command when called without any subcommands
@@ -21,7 +17,8 @@ var RootCmd = &cobra.Command{
 	Short: "Armory Version Manager",
 }
 
-func Execute()  {
+func Execute() {
+	//goland:noinspection GoBoolExpressions because incorrectly detects as "always false"
 	if runtime.GOOS == "windows" {
 		log.Fatalf("avm only supports OS X and GNU+Linux")
 	}
@@ -42,17 +39,16 @@ func Execute()  {
 
 func init() {
 	RootCmd.PersistentFlags().BoolVarP(&verboseFlag, "verbose", "v", false, "show more details")
-	RootCmd.PersistentPreRunE = configureLogging
+	RootCmd.PersistentPreRun = configureLogging
 }
 
-func configureLogging(cmd *cobra.Command, args []string) error {
+func configureLogging(_ *cobra.Command, _ []string) {
 	lvl := log.InfoLevel
 	if verboseFlag {
 		lvl = log.DebugLevel
 	}
 	log.SetLevel(lvl)
 	log.SetFormatter(&easy.Formatter{
-		LogFormat:       "%msg%\n",
+		LogFormat: "%msg%\n",
 	})
-	return nil
 }
