@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Masterminds/semver/v3"
 	"github.com/hashicorp/go-retryablehttp"
+	log "github.com/sirupsen/logrus"
 	"net/url"
 	"sort"
 	"strings"
@@ -29,12 +30,12 @@ func GetAllVersions() ([]string, error) {
 		u := buildUrl(params)
 		httpRes, err := client.Get(u)
 		if err != nil {
-			return []string{}, err
+			return nil, err
 		}
 
 		var res listBucketResult
 		if err := xml.NewDecoder(httpRes.Body).Decode(&res); err != nil {
-			return []string{}, err
+			return nil, err
 		}
 		more = res.IsTruncated
 		if res.NextContinuationToken != "" {
@@ -44,7 +45,7 @@ func GetAllVersions() ([]string, error) {
 		for _, o := range res.Contents {
 			v, err := o.version()
 			if err != nil {
-				return []string{}, err
+				return nil, err
 			}
 			versions = append(versions, v)
 		}
@@ -74,7 +75,7 @@ func GetBinDownloadUrlForVersion(version, goos, goarch string) string {
 func buildUrl(params url.Values) string {
 	u, err := url.Parse(repositoryUrl)
 	if err != nil {
-		panic(err)
+		log.Fatalf("repositoryUrl %s invalid: %v", repositoryUrl, err)
 	}
 	u.RawQuery = params.Encode()
 	return u.String()

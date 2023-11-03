@@ -9,10 +9,6 @@ import (
 	"runtime"
 )
 
-const (
-	COMMAND = "armory"
-)
-
 var verboseFlag bool
 
 // RootCmd represents the base command when called without any subcommands
@@ -43,10 +39,10 @@ func Execute() {
 
 func init() {
 	RootCmd.PersistentFlags().BoolVarP(&verboseFlag, "verbose", "v", false, "show more details")
-	RootCmd.PersistentPreRunE = configureLogging
+	RootCmd.PersistentPreRun = configureLogging
 }
 
-func configureLogging(cmd *cobra.Command, args []string) error {
+func configureLogging(_ *cobra.Command, _ []string) {
 	lvl := log.InfoLevel
 	if verboseFlag {
 		lvl = log.DebugLevel
@@ -55,5 +51,4 @@ func configureLogging(cmd *cobra.Command, args []string) error {
 	log.SetFormatter(&easy.Formatter{
 		LogFormat: "%msg%\n",
 	})
-	return nil
 }
