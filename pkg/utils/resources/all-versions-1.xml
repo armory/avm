@@ -4,6 +4,9 @@
     <IsTruncated>true</IsTruncated>
     <NextContinuationToken>l0g4nr0y</NextContinuationToken>
     <Contents>
+        <Key>cli/</Key>
+    </Contents>
+    <Contents>
         <Key>cli/v1.10.0/armory-darwin-amd64</Key>
     </Contents>
     <Contents>

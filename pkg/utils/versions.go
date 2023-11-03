@@ -44,10 +44,9 @@ func GetAllVersions() ([]string, error) {
 
 		for _, o := range res.Contents {
 			v, err := o.version()
-			if err != nil {
-				return nil, err
+			if err == nil {
+				versions = append(versions, v)
 			}
-			versions = append(versions, v)
 		}
 	}
 
