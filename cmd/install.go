@@ -28,7 +28,7 @@ func execInstallCmd(cmd *cobra.Command, args []string) {
 		var err error
 		version, err = utils.GetLatestVersion()
 		if err != nil {
-			log.Fatalf(err.Error())
+			log.Fatal(err)
 		}
 		useVersionAsDefault = true
 	} else {

@@ -33,7 +33,7 @@ func GetAllVersions() ([]string, error) {
 		}
 
 		var res listBucketResult
-		if err = xml.NewDecoder(httpRes.Body).Decode(&res); err != nil {
+		if err := xml.NewDecoder(httpRes.Body).Decode(&res); err != nil {
 			return []string{}, err
 		}
 		more = res.IsTruncated
