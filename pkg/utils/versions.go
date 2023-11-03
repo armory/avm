@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Masterminds/semver/v3"
 	"github.com/hashicorp/go-retryablehttp"
+	"github.com/samber/lo"
 	log "github.com/sirupsen/logrus"
 	"net/url"
 	"sort"
@@ -56,7 +57,8 @@ func GetAllVersions() ([]string, error) {
 	for _, v := range versions {
 		versionStrings = append(versionStrings, v.Original())
 	}
-	return versionStrings, nil
+
+	return lo.Uniq(versionStrings), nil
 }
 
 func GetLatestVersion() (string, error) {
