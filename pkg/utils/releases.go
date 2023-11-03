@@ -1,68 +1,96 @@
 package utils
 
 import (
-	"context"
+	"encoding/xml"
 	"fmt"
-	"github.com/google/go-github/v39/github"
-	log "github.com/sirupsen/logrus"
-	"runtime"
+	"github.com/Masterminds/semver/v3"
+	"github.com/hashicorp/go-retryablehttp"
+	"net/url"
+	"sort"
+	"strings"
 )
 
 const (
-	OWNER   = "armory-io"
-	REPO    = "armory-cli"
-	COMMAND = "armory"
+	repositoryUrl = "https://armory-cli-releases.s3.amazonaws.com/"
+
+	cliPrefix = "cli"
 )
 
-var client = github.NewClient(nil)
-var ctx = context.Background()
+var client = retryablehttp.NewClient()
 
-func GetAllReleases() []*github.RepositoryRelease {
-	opt := &github.ListOptions{
-		PerPage: 10,
-	}
-	var allReleases []*github.RepositoryRelease
-	for {
-		repositoryReleases, response, err := client.Repositories.ListReleases(ctx, OWNER, REPO, opt)
+// GetAllVersions returns versions available in S3 repository, sorted as SemVers in descending order.
+func GetAllVersions() ([]string, error) {
+	var versions []*semver.Version
+	more := true
+	params := url.Values{}
+	params.Set("list-type", "2")
+	params.Set("prefix", cliPrefix)
+	for more {
+		u := buildUrl(params)
+		httpRes, err := client.Get(u)
 		if err != nil {
-			log.Fatalf(err.Error())
+			return []string{}, err
 		}
-		allReleases = append(allReleases, repositoryReleases...)
-		if response.NextPage == 0 {
-			break
+
+		var res listBucketResult
+		if err = xml.NewDecoder(httpRes.Body).Decode(&res); err != nil {
+			return []string{}, err
 		}
-		opt.Page = response.NextPage
+		more = res.IsTruncated
+		if res.NextContinuationToken != "" {
+			params.Set("continuation-token", res.NextContinuationToken)
+		}
+
+		for _, o := range res.Contents {
+			v, err := o.version()
+			if err != nil {
+				return []string{}, err
+			}
+			versions = append(versions, v)
+		}
 	}
 
-	return allReleases
+	sort.Sort(sort.Reverse(semver.Collection(versions)))
+
+	var versionStrings []string
+	for _, v := range versions {
+		versionStrings = append(versionStrings, v.Original())
+	}
+	return versionStrings, nil
 }
 
-func GetLatestVersion() string {
-	repositoryRelease, _, err := client.Repositories.GetLatestRelease(ctx, OWNER, REPO)
+func GetLatestVersion() (string, error) {
+	all, err := GetAllVersions()
 	if err != nil {
-		log.Fatalf(err.Error())
+		return "", err
 	}
-	return *repositoryRelease.TagName
+	return all[0], err
 }
 
-func GetBinDownloadUrlForVersion(version string) string {
-	goos := runtime.GOOS
-	goarch := runtime.GOARCH
-	release, _, err := client.Repositories.GetReleaseByTag(ctx, OWNER, REPO, version)
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
+func GetBinDownloadUrlForVersion(version, goos, goarch string) string {
+	return fmt.Sprintf("%s%s/%s/armory-%s-%s", repositoryUrl, cliPrefix, version, goos, goarch)
+}
 
-	var assetToInstall *github.ReleaseAsset
-	var assetNameToFind = fmt.Sprintf("%s-%s-%s", COMMAND, goos, goarch)
-	for _, asset := range release.Assets {
-		if *asset.Name == assetNameToFind {
-			assetToInstall = asset
-			break
-		}
+func buildUrl(params url.Values) string {
+	u, err := url.Parse(repositoryUrl)
+	if err != nil {
+		panic(err)
 	}
-	if assetToInstall == nil {
-		log.Fatalf("Unable to find release asset with name: %s", assetNameToFind)
-	}
-	return *assetToInstall.BrowserDownloadURL
+	u.RawQuery = params.Encode()
+	return u.String()
+}
+
+type listBucketResult struct {
+	IsTruncated           bool
+	Contents              []object
+	NextContinuationToken string
+}
+
+type object struct {
+	Key string // asset key has format "cli/{version}/armory-{os}-{arch}"
+}
+
+func (o object) version() (*semver.Version, error) {
+	v := strings.Split(o.Key, "/")[1]
+	return semver.NewVersion(v)
 }

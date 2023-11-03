@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListBucketResult
+        xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+    <IsTruncated>true</IsTruncated>
+    <NextContinuationToken>l0g4nr0y</NextContinuationToken>
+    <Contents>
+        <Key>cli/v1.10.0/armory-darwin-amd64</Key>
+    </Contents>
+    <Contents>
+        <Key>cli/v1.1.11/armory-darwin-amd64</Key>
+    </Contents>
+</ListBucketResult>

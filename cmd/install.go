@@ -1,4 +1,3 @@
-
 package cmd
 
 import (
@@ -16,8 +15,8 @@ import (
 var installCmd = &cobra.Command{
 	Use:   "install [version]",
 	Short: "install an Armory CLI version, if version is omitted latest will be used and it will be linked to as default",
-	Run: execInstallCmd,
-	Args: cobra.MaximumNArgs(1),
+	Run:   execInstallCmd,
+	Args:  cobra.MaximumNArgs(1),
 }
 
 func execInstallCmd(cmd *cobra.Command, args []string) {
@@ -26,7 +25,11 @@ func execInstallCmd(cmd *cobra.Command, args []string) {
 	useVersionAsDefault, _ := cmd.Flags().GetBool("default")
 	var version string
 	if len(args) == 0 {
-		version = utils.GetLatestVersion()
+		var err error
+		version, err = utils.GetLatestVersion()
+		if err != nil {
+			log.Fatalf(err.Error())
+		}
 		useVersionAsDefault = true
 	} else {
 		version = args[0]
@@ -46,7 +49,7 @@ func execInstallCmd(cmd *cobra.Command, args []string) {
 	}
 
 	path := filepath.Join(dir, "armory")
-	err = downloadRelease(path, utils.GetBinDownloadUrlForVersion(version))
+	err = downloadRelease(path, utils.GetBinDownloadUrlForVersion(version, goos, goarch))
 	if err != nil {
 		log.Fatalf("Failed to download release, err: %s", err.Error())
 	}
