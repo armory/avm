@@ -74,7 +74,7 @@ fi
 
 echo "Detected ${OS}-${ARCH}, preparing to install Armory Version Manager and Armory CLI"
 
-DOWNLOAD_URL=https://armory-cli-releases.s3.amazonaws.com/avm/v1.2.0/avm-${OS}-${ARCH}
+DOWNLOAD_URL=https://armory-cli-releases.s3.amazonaws.com/avm/latest/avm-${OS}-${ARCH}
 DEST_DIR="${HOME}/.avm/bin"
 mkdir -p "$DEST_DIR"
 DEST="${DEST_DIR}/avm"
