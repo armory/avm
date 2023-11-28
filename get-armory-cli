@@ -130,5 +130,11 @@ echo "##########################################################################
 echo "#                          Install of avm and armory complete"
 echo "# This install script updates your bash or zsh profile to add ${HOME}/.avm/bin to your path"
 echo "# If you aren't using bash or zsh you will need to do this manually"
-echo "# You may have to start a new terminal session or re-source your bash or zsh profile/rc"
+echo "#"
+echo "# Please close and restart the terminal to use the Armory CLI or run the following to use it now:"
+if [[ $OS == 'darwin' ]]; then
+  echo "# source $avm_bash_profile && source $avm_zshrc"
+else
+  echo "# source $avm_bashrc && source $avm_zshrc"
+fi
 echo "############################################################################################"
