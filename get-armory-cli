@@ -109,6 +109,8 @@ if [[ $OS == 'darwin' ]]; then
   if [[ -z $(grep "export PATH=\"\${PATH}:${HOME}/.avm/bin" "$avm_bash_profile") ]]; then
     echo -e "$PATH_SNIPPIT" >> "$avm_bash_profile"
     echo "Added ${HOME}/.avm/bin to path in $avm_bash_profile"
+    echo "Please close and restart your terminal to use the Armory CLI or run the following to use it now:"
+    echo "source $avm_bash_profile"
   fi
 else
   echo "Attempt update of interactive bash profile on regular UNIX..."
@@ -116,6 +118,8 @@ else
   if [[ -z $(grep "export PATH=\"\${PATH}:${HOME}/.avm/bin" "$avm_bashrc") ]]; then
       echo -e "$PATH_SNIPPIT" >> "$avm_bashrc"
       echo "Added ${HOME}/.avm/bin to path in $avm_bashrc"
+      echo "Please close and restart your terminal to use the Armory CLI or run the following to use it now:"
+      echo "source $avm_bashrc"
   fi
 fi
 
@@ -124,11 +128,19 @@ touch "$avm_zshrc"
 if [[ -z $(grep "export PATH=\"\${PATH}:${HOME}/.avm/bin" "$avm_zshrc") ]]; then
     echo -e "$PATH_SNIPPIT" >> "$avm_zshrc"
     echo "Added ${HOME}/.avm/bin to path in ${avm_zshrc}"
+          echo "Please close and restart your terminal to use the Armory CLI or run the following to use it now:"
+          echo "source $avm_zshrc"
 fi
 
 echo "############################################################################################"
 echo "#                          Install of avm and armory complete"
 echo "# This install script updates your bash or zsh profile to add ${HOME}/.avm/bin to your path"
 echo "# If you aren't using bash or zsh you will need to do this manually"
-echo "# You may have to start a new terminal session or re-source your bash or zsh profile/rc"
+echo "#"
+echo "# Please close and restart the terminal to use the Armory CLI or run the following to use it now:"
+if [[ $OS == 'darwin' ]]; then
+  echo "# source $avm_bash_profile && source $avm_zshrc"
+else
+  echo "# source $avm_bashrc && source $avm_zshrc"
+fi
 echo "############################################################################################"
